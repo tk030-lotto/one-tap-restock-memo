@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:;">
+  <meta name="theme-color" content="#09090b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="家庭で消耗品がなくなった瞬間に1タップで記録し、次回の買い物対象を把握するワンタップメモ">
+  <title>消耗品補充ワンタップメモ</title>
+  <link rel="icon" type="image/png" href="./icons/icon-192.png">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <h1 class="app-title">
+        <span aria-hidden="true">🧻</span>
+        <span>消耗品補充ワンタップメモ</span>
+      </h1>
+      <span id="active-count-badge" class="count-badge" aria-live="polite">要補充: 0件</span>
+    </header>
+
+    <div id="storage-warning" class="storage-warning" role="alert" hidden>
+      ブラウザの保存制限により、このタブを閉じるとデータが消える場合があります。
+    </div>
+
+    <main class="app-main">
+      <!-- 1. 要補充リスト（買い物対象） -->
+      <section aria-labelledby="active-heading">
+        <div class="section-header">
+          <h2 id="active-heading" class="section-title">■ 要補充リスト（買ったら1タップ）</h2>
+        </div>
+        <div id="empty-active-state" class="empty-state" hidden>
+          <p class="empty-state-title">現在、補充が必要な消耗品はありません</p>
+          <p class="empty-state-desc">下の「よく使う項目」を1タップするか、入力欄から追加してください</p>
+        </div>
+        <ul id="active-list" class="item-list" aria-label="要補充の消耗品リスト"></ul>
+      </section>
+
+      <!-- 2. よく使う項目（履歴から1タップ追加） -->
+      <section id="history-section" aria-labelledby="history-heading">
+        <div class="section-header">
+          <h2 id="history-heading" class="section-title">■ よく使う項目から1タップ追加</h2>
+          <span class="section-hint">タップで要補充へ</span>
+        </div>
+        <div id="history-chips" class="chips-grid" role="group" aria-label="よく使う消耗品候補"></div>
+      </section>
+
+      <!-- 3. 補充済み（完了）リスト -->
+      <section id="completed-section" aria-labelledby="completed-heading" hidden>
+        <div class="section-header">
+          <h2 id="completed-heading" class="section-title">
+            ■ 補充済み<span id="completed-count"></span>
+          </h2>
+          <button type="button" id="clear-completed-btn" class="clear-btn" aria-label="補充済みの項目をすべて削除">
+            完了済みを削除
+          </button>
+        </div>
+        <ul id="completed-list" class="item-list" aria-label="補充済みの消耗品リスト"></ul>
+      </section>
+
+      <!-- 4. アプリ情報・著作権表示 -->
+      <footer class="app-legal-footer">
+        <p class="storage-notice">
+          【免責】本ツールはブラウザの保存領域を利用した簡易メモツールです。入力したデータはお使いの端末のブラウザ内にのみ保存されます。端末やブラウザの操作・データ消去等による消失について責任を負いかねます。
+        </p>
+        <p class="copyright-text">
+          © 2026 Zero Dev (tk030) ·
+          <a href="https://github.com/tk030-lotto/one-tap-restock-memo/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a> ·
+          <a href="https://zero-dev.jp/" target="_blank" rel="noopener noreferrer">Zero Dev</a>
+        </p>
+      </footer>
+    </main>
+
+    <!-- Undoトースト（3.5秒表示） -->
+    <div id="undo-toast" class="undo-toast" role="status" aria-live="polite" hidden>
+      <span id="undo-message" class="undo-message"></span>
+      <button type="button" id="undo-btn" class="undo-btn">元に戻す</button>
+    </div>
+
+    <!-- 下部固定入力バー -->
+    <footer class="app-footer">
+      <form id="add-form" class="add-form" autocomplete="off">
+        <input
+          type="text"
+          id="item-input"
+          class="item-input"
+          placeholder="なくなった物を入力"
+          maxlength="50"
+          aria-label="追加する消耗品の名前"
+        >
+        <button type="submit" class="submit-btn">追加</button>
+      </form>
+    </footer>
+  </div>
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

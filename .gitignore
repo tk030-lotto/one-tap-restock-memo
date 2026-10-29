@@ -1,0 +1,13 @@
+# 許可リスト方式: すべて除外して、公開するものだけを許可する
+/*
+!/.gitignore
+!/index.html
+!/style.css
+!/sw.js
+!/manifest.json
+!/LICENSE
+!/README.md
+!/ツール起動.bat
+!/js/
+!/icons/
+
