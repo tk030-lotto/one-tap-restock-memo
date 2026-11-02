@@ -94,6 +94,8 @@ MIT License です。詳細は [LICENSE](LICENSE) を参照してください。
 ES Modules および Service Worker を利用しているため、ローカルHTTPサーバー経由で起動してください。
 
 ```bash
-python -m http.server 8080
+python -m http.server 8080 --bind 127.0.0.1
 ```
 ブラウザで `http://localhost:8080` を開きます。
+
+`--bind 127.0.0.1` は、同じネットワーク上の他の端末から見えないようにするための指定です（同梱の `ツール起動.bat` も同じ待ち受けになります）。
