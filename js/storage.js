@@ -91,8 +91,9 @@ export function loadState() {
     const serialized = window.localStorage.getItem(STORAGE_KEY);
     if (!serialized) {
       const initial = createInitialState();
-      saveState(initial);
-      return { state: initial, storageAvailable: true };
+      // 初回保存に失敗した場合は「保存できない環境」として扱う (I-1)
+      const saved = saveState(initial);
+      return { state: initial, storageAvailable: saved };
     }
     const parsed = JSON.parse(serialized);
     return {

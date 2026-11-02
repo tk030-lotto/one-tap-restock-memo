@@ -81,11 +81,12 @@ export function addItemOrRestock(state, rawName) {
     existingItem.createdAt = now;
     delete existingItem.completedAt;
     incrementHistory(state.history, name, now);
-    saveState(state);
+    const persisted = saveState(state);
     return {
       status: 'reactivated',
       targetItem: existingItem,
       previousState,
+      persisted,
       message: `「${name}」を要補充に追加しました`
     };
   }
@@ -99,12 +100,13 @@ export function addItemOrRestock(state, rawName) {
   };
   state.items.unshift(newItem);
   incrementHistory(state.history, name, now);
-  saveState(state);
+  const persisted = saveState(state);
 
   return {
     status: 'added',
     targetItem: newItem,
     previousState,
+    persisted,
     message: `「${name}」を要補充に追加しました`
   };
 }
@@ -129,11 +131,12 @@ export function toggleItemCompleted(state, itemId) {
     // 要補充 → 補充済み
     item.isCompleted = true;
     item.completedAt = now;
-    saveState(state);
+    const persisted = saveState(state);
     return {
       changed: true,
       item,
       previousState,
+      persisted,
       message: `「${item.name}」を補充済みにしました`
     };
   } else {
@@ -141,11 +144,12 @@ export function toggleItemCompleted(state, itemId) {
     item.isCompleted = false;
     item.createdAt = now;
     delete item.completedAt;
-    saveState(state);
+    const persisted = saveState(state);
     return {
       changed: true,
       item,
       previousState,
+      persisted,
       message: `「${item.name}」を要補充に戻しました`
     };
   }
@@ -165,11 +169,12 @@ export function deleteItemById(state, itemId) {
 
   const previousState = cloneState(state);
   const [removed] = state.items.splice(index, 1);
-  saveState(state);
+  const persisted = saveState(state);
 
   return {
     deleted: true,
     previousState,
+    persisted,
     message: `「${removed.name}」を削除しました`
   };
 }
@@ -187,11 +192,12 @@ export function clearCompletedItems(state) {
 
   const previousState = cloneState(state);
   state.items = state.items.filter((it) => !it.isCompleted);
-  saveState(state);
+  const persisted = saveState(state);
 
   return {
     clearedCount: completedCount,
     previousState,
+    persisted,
     message: `補充済みの項目（${completedCount}件）をクリアしました`
   };
 }
@@ -203,14 +209,15 @@ export function clearCompletedItems(state) {
  * @param {boolean} persist localStorageへ書き戻すかどうか
  */
 export function replaceState(state, nextState, persist = true) {
-  if (!nextState) return false;
+  if (!nextState) return { replaced: false, persisted: false };
   state.version = nextState.version;
   state.items = nextState.items.map((it) => ({ ...it }));
   state.history = nextState.history.map((h) => ({ ...h }));
+  let persisted = true;
   if (persist) {
-    saveState(state);
+    persisted = saveState(state);
   }
-  return true;
+  return { replaced: true, persisted };
 }
 
 /**

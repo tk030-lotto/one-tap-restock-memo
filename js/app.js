@@ -45,6 +45,22 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.storageWarning.hidden = false;
   }
 
+  const SAVE_FAILED_MESSAGE = '保存できませんでした。ブラウザの保存領域が使えないため、この画面を閉じるとデータは失われます。';
+
+  /**
+   * 保存に失敗したときは、既存の警告バナーを表示し、トーストの文言を失敗に差し替える (I-1)
+   * @param {Object} result state.js の戻り値
+   * @param {string} fallback 成功時の文言
+   * @returns {string}
+   */
+  function messageFor(result, fallback) {
+    if (result && result.persisted === false) {
+      if (elements.storageWarning) elements.storageWarning.hidden = false;
+      return SAVE_FAILED_MESSAGE;
+    }
+    return fallback || (result && result.message) || '';
+  }
+
   let undoSnapshot = null;
   let undoTimerId = null;
 
@@ -89,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
       highlightExistingItem(result.targetItem.id, elements.activeList);
       triggerToast(result.message, null);
     } else if (result.previousState) {
-      triggerToast(result.message, result.previousState);
+      triggerToast(messageFor(result, result.message), result.previousState);
     }
   });
 
@@ -105,13 +121,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = toggleItemCompleted(state, itemId);
       if (res.changed) {
         renderApp(state, elements);
-        triggerToast(res.message, res.previousState);
+        triggerToast(messageFor(res, res.message), res.previousState);
       }
     } else if (action === 'delete') {
       const res = deleteItemById(state, itemId);
       if (res.deleted) {
         renderApp(state, elements);
-        triggerToast(res.message, res.previousState);
+        triggerToast(messageFor(res, res.message), res.previousState);
       }
     }
   });
@@ -126,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderApp(state, elements);
 
     if (result.previousState) {
-      triggerToast(result.message, result.previousState);
+      triggerToast(messageFor(result, result.message), result.previousState);
     }
   });
 
@@ -142,13 +158,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = toggleItemCompleted(state, itemId);
       if (res.changed) {
         renderApp(state, elements);
-        triggerToast(res.message, res.previousState);
+        triggerToast(messageFor(res, res.message), res.previousState);
       }
     } else if (action === 'delete') {
       const res = deleteItemById(state, itemId);
       if (res.deleted) {
         renderApp(state, elements);
-        triggerToast(res.message, res.previousState);
+        triggerToast(messageFor(res, res.message), res.previousState);
       }
     }
   });
@@ -158,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const res = clearCompletedItems(state);
     if (res.clearedCount > 0) {
       renderApp(state, elements);
-      triggerToast(res.message, res.previousState);
+      triggerToast(messageFor(res, res.message), res.previousState);
     }
   });
 
@@ -169,8 +185,11 @@ document.addEventListener('DOMContentLoaded', () => {
       clearTimeout(undoTimerId);
       undoTimerId = null;
     }
-    restoreStateFromSnapshot(state, undoSnapshot);
+    const restored = restoreStateFromSnapshot(state, undoSnapshot);
     undoSnapshot = null;
+    if (restored && restored.persisted === false && elements.storageWarning) {
+      elements.storageWarning.hidden = false;
+    }
     hideToastUI(elements);
     renderApp(state, elements);
   });

@@ -15,7 +15,7 @@ if %errorlevel% equ 0 (
     echo ローカルサーバーを起動しています（ポート 8080）...
     echo ブラウザで http://localhost:8080 を開きます。
     start "" "http://localhost:8080"
-    python -m http.server 8080
+    python -m http.server 8080 --bind 127.0.0.1
     pause
     exit /b 0
 )
@@ -25,7 +25,7 @@ if %errorlevel% equ 0 (
     echo ローカルサーバーを起動しています（ポート 8080）...
     echo ブラウザで http://localhost:8080 を開きます。
     start "" "http://localhost:8080"
-    py -m http.server 8080
+    py -m http.server 8080 --bind 127.0.0.1
     pause
     exit /b 0
 )
@@ -36,7 +36,7 @@ if %errorlevel% equ 0 (
     echo ローカルサーバーを起動しています（ポート 8080）...
     echo ブラウザで http://localhost:8080 を開きます。
     start "" "http://localhost:8080"
-    node -e "const http=require('http'),fs=require('fs'),path=require('path'),types={'.html':'text/html','.css':'text/css','.js':'application/javascript','.json':'application/json','.png':'image/png'};http.createServer((req,res)=>{let f=path.join(process.cwd(),decodeURIComponent(req.url.split('?')[0]));if(fs.existsSync(f)&&fs.statSync(f).isDirectory())f=path.join(f,'index.html');fs.readFile(f,(err,data)=>{if(err){res.writeHead(404);res.end('Not Found');return;}res.writeHead(200,{'Content-Type':types[path.extname(f)]||'application/octet-stream'});res.end(data);});}).listen(8080);"
+    node -e "const http=require('http'),fs=require('fs'),path=require('path'),types={'.html':'text/html','.css':'text/css','.js':'application/javascript','.json':'application/json','.png':'image/png'};const root=process.cwd();http.createServer((req,res)=>{let rel;try{rel=decodeURIComponent(req.url.split('?')[0]);}catch(e){res.writeHead(400);res.end('Bad Request');return;}let f=path.resolve(root,'.'+rel);if(f!==root&&!f.startsWith(root+path.sep)){res.writeHead(403);res.end('Forbidden');return;}if(fs.existsSync(f)&&fs.statSync(f).isDirectory())f=path.join(f,'index.html');fs.readFile(f,(err,data)=>{if(err){res.writeHead(404);res.end('Not Found');return;}res.writeHead(200,{'Content-Type':types[path.extname(f)]||'application/octet-stream'});res.end(data);});}).listen(8080,'127.0.0.1');"
     pause
     exit /b 0
 )
